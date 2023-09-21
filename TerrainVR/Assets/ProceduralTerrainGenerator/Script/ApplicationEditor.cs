@@ -15,7 +15,12 @@ public class ApplicationEditor : EditorWindow
     {
         if (GUILayout.Button("Mountain"))
         {
-            ModifyTerrain(0);
+            //ModifyTerrain(0);
+            TerrainModifier[] terrains = FindObjectsOfType<TerrainModifier>();
+            if (terrains.Length > 0)
+            {
+                terrains[0].Erosion();
+            }
         }
 
         if (GUILayout.Button("Canyon"))

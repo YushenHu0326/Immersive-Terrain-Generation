@@ -108,7 +108,7 @@ public class VRPlayer : MonoBehaviour
             if (Physics.Raycast(new Vector3(rightController.transform.position.x, 500f, rightController.transform.position.z), Vector3.down, out var hit)
                 && (leftController != null && rightController != null))
             {
-                float offset = rightController.transform.position.y - terrainTool.terrainOffset;
+                float offset = rightController.transform.position.y - (hit.transform.position.y + terrainTool.terrainOffset);
 
                 if (Mathf.Abs(offset) * 2f > radius) radius = Mathf.Abs(offset) * 2f;
 

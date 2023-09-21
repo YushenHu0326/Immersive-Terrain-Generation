@@ -169,6 +169,7 @@ public class TerrainModifier : MonoBehaviour
         blur.Radial = 1;
 
         blur.GaussianBlur(ref tex);
+        blur.GaussianBlur(ref tex);
         DestroyImmediate(blur);
 
         tex.Apply();
@@ -227,6 +228,23 @@ public class TerrainModifier : MonoBehaviour
         }
 
         terrainData.SetHeights(xOffset, yOffset, newHeights);
+    }
+
+    public void Erosion()
+    {
+        GrabTerrainData();
+
+        float[,] originHeights = terrainData.GetHeights(0, 0, terrainData.heightmapResolution, terrainData.heightmapResolution);
+
+        for (int y = 0; y < terrainData.heightmapResolution; y++)
+        {
+            for (int x = 0; x < terrainData.heightmapResolution; x++)
+            {
+                originHeights[y, x] -= (1f - terrainData.GetInterpolatedNormal((float)y / terrainData.heightmapResolution, (float)x / terrainData.heightmapResolution).y) / terrainData.size.y;
+            }
+        }
+
+        terrainData.SetHeights(0, 0, originHeights);
     }
 
     public void ModifyTerrain(int i, float erosionStrength)
