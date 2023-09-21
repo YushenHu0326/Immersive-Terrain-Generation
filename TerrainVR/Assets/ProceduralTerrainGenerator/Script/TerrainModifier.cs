@@ -120,7 +120,7 @@ public class TerrainModifier : MonoBehaviour
                 float g = tex.GetPixel(w, h).g;
                 float b = tex.GetPixel(w, h).b;
 
-                float n = Mathf.PerlinNoise((float)w / 30f, (float)h / 30f);
+                float n = Mathf.PerlinNoise((float)w / 25f, (float)h / 25f);
                 
                 r *= (n * 0.4f * erosionStrength / 100f + 1f);
                 g *= (n * 0.4f * erosionStrength / 100f + 1f);
@@ -165,6 +165,12 @@ public class TerrainModifier : MonoBehaviour
 
     Texture2D RestoreHeightmap(Texture2D tex)
     {
+        ParallelGaussianBlur blur = gameObject.AddComponent<ParallelGaussianBlur>();
+        blur.Radial = 1;
+
+        blur.GaussianBlur(ref tex);
+        DestroyImmediate(blur);
+
         tex.Apply();
         RenderTexture rt = RenderTexture.GetTemporary(range, range, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
         RenderTexture.active = rt;
