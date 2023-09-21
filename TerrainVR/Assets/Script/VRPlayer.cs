@@ -20,6 +20,8 @@ public class VRPlayer : MonoBehaviour
     private Vector3 lastStrokePosition;
     private bool strokeButtonPressed;
 
+    private float erosionStrength;
+
     private float xMin, xMax, yMin, yMax, radius;
 
     Texture2D userInput;
@@ -64,6 +66,8 @@ public class VRPlayer : MonoBehaviour
         yMin = 10000f;
         yMax = -10000f;
         radius = 0f;
+
+        erosionStrength = 100f;
     }
 
     // Update is called once per frame
@@ -108,15 +112,15 @@ public class VRPlayer : MonoBehaviour
 
                 if (Mathf.Abs(offset) * 2f > radius) radius = Mathf.Abs(offset) * 2f;
 
+                float brushSize = Mathf.Abs(offset) * 3f;
+
                 if (terrainType != TerrainType.Canyon)
                 {
-                    float brushSize = Mathf.Abs(offset) * 3f;
                     terrainTool.RaiseTerrain(hit.point, Mathf.Abs(offset), (int)brushSize, (int)brushSize);
                 }
                 else
                 {
-                    float brushSize = Mathf.Abs(offset) * 5f;
-                    terrainTool.LowerTerrain(hit.point, Mathf.Abs(offset), (int)brushSize, (int)brushSize);
+                    terrainTool.LowerTerrain(hit.point, rightController.transform.position.y - terrainTool.terrainOffset, (int)brushSize, (int)brushSize);
                 }
             }
 
@@ -179,7 +183,7 @@ public class VRPlayer : MonoBehaviour
                 if (terrainType == TerrainType.Canyon) terrainTypeNum = 1;
                 else if (terrainType == TerrainType.Glacier) terrainTypeNum = 2;
 
-                terrainTool.ApplyTerrain(terrainTypeNum, xMin, xMax, yMin, yMax, radius);
+                terrainTool.ApplyTerrain(terrainTypeNum, xMin, xMax, yMin, yMax, radius, erosionStrength);
 
                 Destroy(stroke);
 
@@ -200,6 +204,11 @@ public class VRPlayer : MonoBehaviour
             {
                 leftPrimaryButtonPressed_f = true;
             }
+
+            if (erosionStrength < 100f) erosionStrength += 1f;
+            erosionStrength = Mathf.Clamp(erosionStrength, 0f, 100f);
+
+            Debug.Log(erosionStrength);
         }
         else
         {
@@ -213,6 +222,11 @@ public class VRPlayer : MonoBehaviour
             {
                 leftSecondaryButtonPressed_f = true;
             }
+
+            if (erosionStrength > 0f) erosionStrength -= 1f;
+            erosionStrength = Mathf.Clamp(erosionStrength, 0f, 100f);
+
+            Debug.Log(erosionStrength);
         }
         else
         {

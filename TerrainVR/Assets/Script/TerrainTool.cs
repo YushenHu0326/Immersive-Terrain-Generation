@@ -21,7 +21,7 @@ public sealed class TerrainTool : MonoBehaviour
     public Terrain _targetTerrain;
     private float[,] virtualHeights;
     private float[,] alphas;
-    private float terrainOffset = 50f;
+    public float terrainOffset = 50f;
 
     private float _sampledHeight;
 
@@ -152,7 +152,7 @@ public sealed class TerrainTool : MonoBehaviour
         }
     }
 
-    public void ApplyTerrain(int terrainType, float xMin, float xMax, float yMin, float yMax, float radius)
+    public void ApplyTerrain(int terrainType, float xMin, float xMax, float yMin, float yMax, float radius, float erosionStrength)
     {
         Vector3 min = WorldToTerrainPosition(new Vector3(xMin, 0f, yMin));
         Vector3 max = WorldToTerrainPosition(new Vector3(xMax, 0f, yMax));
@@ -166,7 +166,7 @@ public sealed class TerrainTool : MonoBehaviour
         modifier.terrainOffset = terrainOffset;
         modifier.range = (int)range;
 
-        modifier.ModifyTerrain(terrainType);
+        modifier.ModifyTerrain(terrainType, erosionStrength);
         for (var y = 0; y < GetHeightmapResolution(); y++)
         {
             for (var x = 0; x < GetHeightmapResolution(); x++)

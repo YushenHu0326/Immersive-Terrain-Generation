@@ -35,7 +35,7 @@ public class ApplicationEditor : EditorWindow
         if (terrains.Length > 0)
         {
             terrains[0].GetDefaultTerrain();
-            terrains[0].ModifyTerrain(i);
+            terrains[0].ModifyTerrain(i, 100f);
         }
     }
 }

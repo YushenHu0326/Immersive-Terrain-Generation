@@ -17,6 +17,7 @@ public class TerrainModifier : MonoBehaviour
     public float[,] alphas;
     public int xOffset, yOffset, range;
     public float terrainOffset = 50f;
+    private float erosionStrength;
 
     private Model model;
     public NNModel mountainModel;
@@ -121,9 +122,9 @@ public class TerrainModifier : MonoBehaviour
 
                 float n = Mathf.PerlinNoise((float)w / 30f, (float)h / 30f);
                 
-                r *= (n * 0.4f + 1f);
-                g *= (n * 0.4f + 1f);
-                b *= (n * 0.4f + 1f);
+                r *= (n * 0.4f * erosionStrength / 100f + 1f);
+                g *= (n * 0.4f * erosionStrength / 100f + 1f);
+                b *= (n * 0.4f * erosionStrength / 100f + 1f);
                 
                 r = r * 5f;
                 g = g * 5f;
@@ -222,8 +223,10 @@ public class TerrainModifier : MonoBehaviour
         terrainData.SetHeights(xOffset, yOffset, newHeights);
     }
 
-    public void ModifyTerrain(int i)
+    public void ModifyTerrain(int i, float erosionStrength)
     {
+        this.erosionStrength = erosionStrength;
+
         LoadModel(i);
         GrabTerrainData();
         Texture2D tex = RetrieveTerrainHeightmap();
@@ -258,17 +261,17 @@ public class TerrainModifier : MonoBehaviour
 
     public void ModifyMountain()
     {
-        ModifyTerrain(0);
+        ModifyTerrain(0, 100f);
     }
 
     public void ModifyCanyon()
     {
-        ModifyTerrain(1);
+        ModifyTerrain(1, 100f);
     }
 
     public void ModifyGlacier()
     {
-        ModifyTerrain(2);
+        ModifyTerrain(2, 100f);
     }
 
     public void OnDestroy()
