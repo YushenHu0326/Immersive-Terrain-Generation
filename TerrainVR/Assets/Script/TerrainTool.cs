@@ -124,6 +124,72 @@ public sealed class TerrainTool : MonoBehaviour
         }
     }
 
+    public void RaiseTerrainFilled(Vector3 worldPosition, Vector3 initialPosition, float height, float initHeight, int brushWidth, int brushHeight)
+    {
+        var brushPosition = GetBrushPosition(worldPosition, brushWidth, brushHeight);
+        var initBrushPosition = GetBrushPosition(initialPosition, brushWidth, brushHeight);
+
+        int worldPositionX = brushPosition.x + (int)((float)brushWidth / 2f);
+        int worldPositionY = brushPosition.y + (int)((float)brushWidth / 2f);
+        int initPositionX = initBrushPosition.x + (int)((float)brushWidth / 2f);
+        int initPositionY = initBrushPosition.y + (int)((float)brushWidth / 2f);
+
+        var brushSize = GetSafeBrushSize(brushPosition.x, brushPosition.y, brushWidth, brushHeight);
+
+        var terrainData = GetTerrainData();
+
+        int start, end;
+        float actualHeight;
+        if (worldPositionX != initPositionX)
+        {
+            start = (int)Mathf.Min(worldPositionX, initPositionX);
+            end = (int)Mathf.Max(worldPositionX, initPositionX);
+
+            int y;
+
+            for (var x = start; x < end; x++)
+            {
+                actualHeight = Mathf.Lerp(initHeight, height, (float)(x - initPositionX) / (float)(worldPositionX - initPositionX));
+                y = initPositionY + (int)((float)(x - initPositionX) / (float)(worldPositionX - initPositionX) * (worldPositionY - initPositionY));
+
+                for (var yy = 0; yy < 20; yy++)
+                {
+                    for (var xx = 0; xx < 20; xx++)
+                    {
+                        if (virtualHeights[yy - 10 + y, xx - 10 + x] < actualHeight / terrainData.size.y)
+                            virtualHeights[yy - 10 + y, xx - 10 + x] = actualHeight / terrainData.size.y;
+                        if (alphas[yy - 10 + y, xx - 10 + x] < 1f)
+                            alphas[yy - 10 + y, xx - 10 + x] = 1f;
+                    }
+                }
+            }
+        }
+        else
+        {
+            start = (int)Mathf.Min(worldPositionY, initPositionY);
+            end = (int)Mathf.Max(worldPositionY, initPositionY);
+
+            int x;
+
+            for (var y = start; y < end; y++)
+            {
+                actualHeight = Mathf.Lerp(initHeight, height, (float)(y - initPositionY) / (float)(worldPositionY - initPositionY));
+                x = (int)initPositionX + (int)((float)(y - initPositionY) / (float)(worldPositionY - initPositionY) * (worldPositionX - initPositionX));
+
+                for (var yy = 0; yy < 20; yy++)
+                {
+                    for (var xx = 0; xx < 20; xx++)
+                    {
+                        if (virtualHeights[yy - 10 + y, xx - 10 + x] < actualHeight / terrainData.size.y)
+                            virtualHeights[yy - 10 + y, xx - 10 + x] = actualHeight / terrainData.size.y;
+                        if (alphas[yy - 10 + y, xx - 10 + x] < 1f)
+                            alphas[yy - 10 + y, xx - 10 + x] = 1f;
+                    }
+                }
+            }
+        }
+    }
+
     public void LowerTerrain(Vector3 worldPosition, float height, int brushWidth, int brushHeight)
     {
         var brushPosition = GetBrushPosition(worldPosition, brushWidth, brushHeight);
@@ -131,8 +197,6 @@ public sealed class TerrainTool : MonoBehaviour
         var brushSize = GetSafeBrushSize(brushPosition.x, brushPosition.y, brushWidth, brushHeight);
 
         var terrainData = GetTerrainData();
-
-        Debug.Log(height);
 
         for (var y = 0; y < brushSize.y; y++)
         {
@@ -152,7 +216,73 @@ public sealed class TerrainTool : MonoBehaviour
         }
     }
 
-    public void ApplyTerrain(int terrainType, float xMin, float xMax, float yMin, float yMax, float radius, float erosionStrength)
+    public void LowerTerrainFilled(Vector3 worldPosition, Vector3 initialPosition, float height, float initHeight, int brushWidth, int brushHeight)
+    {
+        var brushPosition = GetBrushPosition(worldPosition, brushWidth, brushHeight);
+        var initBrushPosition = GetBrushPosition(initialPosition, brushWidth, brushHeight);
+
+        int worldPositionX = brushPosition.x + (int)((float)brushWidth / 2f);
+        int worldPositionY = brushPosition.y + (int)((float)brushWidth / 2f);
+        int initPositionX = initBrushPosition.x + (int)((float)brushWidth / 2f);
+        int initPositionY = initBrushPosition.y + (int)((float)brushWidth / 2f);
+
+        var brushSize = GetSafeBrushSize(brushPosition.x, brushPosition.y, brushWidth, brushHeight);
+
+        var terrainData = GetTerrainData();
+
+        int start, end;
+        float actualHeight;
+        if (worldPositionX != initPositionX)
+        {
+            start = (int)Mathf.Min(worldPositionX, initPositionX);
+            end = (int)Mathf.Max(worldPositionX, initPositionX);
+
+            int y;
+
+            for (var x = start; x < end; x++)
+            {
+                actualHeight = Mathf.Lerp(initHeight, height, (float)(x - initPositionX) / (float)(worldPositionX - initPositionX));
+                y = initPositionY + (int)((float)(x - initPositionX) / (float)(worldPositionX - initPositionX) * (worldPositionY - initPositionY));
+
+                for (var yy = 0; yy < 20; yy++)
+                {
+                    for (var xx = 0; xx < 20; xx++)
+                    {
+                        if (virtualHeights[yy - 10 + y, xx - 10 + x] > (terrainOffset - actualHeight) / terrainData.size.y)
+                            virtualHeights[yy - 10 + y, xx - 10 + x] = (terrainOffset - actualHeight) / terrainData.size.y;
+                        if (alphas[yy - 10 + y, xx - 10 + x] < 1f)
+                            alphas[yy - 10 + y, xx - 10 + x] = 1f;
+                    }
+                }
+            }
+        }
+        else
+        {
+            start = (int)Mathf.Min(worldPositionY, initPositionY);
+            end = (int)Mathf.Max(worldPositionY, initPositionY);
+
+            int x;
+
+            for (var y = start; y < end; y++)
+            {
+                actualHeight = Mathf.Lerp(initHeight, height, (float)(y - initPositionY) / (float)(worldPositionY - initPositionY));
+                x = (int)initPositionX + (int)((float)(y - initPositionY) / (float)(worldPositionY - initPositionY) * (worldPositionX - initPositionX));
+
+                for (var yy = 0; yy < 20; yy++)
+                {
+                    for (var xx = 0; xx < 20; xx++)
+                    {
+                        if (virtualHeights[yy - 10 + y, xx - 10 + x] < actualHeight / terrainData.size.y)
+                            virtualHeights[yy - 10 + y, xx - 10 + x] = actualHeight / terrainData.size.y;
+                        if (alphas[yy - 10 + y, xx - 10 + x] < 1f)
+                            alphas[yy - 10 + y, xx - 10 + x] = 1f;
+                    }
+                }
+            }
+        }
+    }
+
+    public void ApplyTerrain(bool filled, int terrainType, float xMin, float xMax, float yMin, float yMax, float radius, float erosionStrength)
     {
         Vector3 min = WorldToTerrainPosition(new Vector3(xMin, 0f, yMin));
         Vector3 max = WorldToTerrainPosition(new Vector3(xMax, 0f, yMax));
@@ -166,7 +296,10 @@ public sealed class TerrainTool : MonoBehaviour
         modifier.terrainOffset = terrainOffset;
         modifier.range = (int)range;
 
-        modifier.ModifyTerrain(terrainType, erosionStrength);
+        if (filled)
+            modifier.ModifyTerrain(terrainType, erosionStrength / 2f, 8);
+        else
+            modifier.ModifyTerrain(terrainType, erosionStrength, 15);
         for (var y = 0; y < GetHeightmapResolution(); y++)
         {
             for (var x = 0; x < GetHeightmapResolution(); x++)
@@ -175,6 +308,57 @@ public sealed class TerrainTool : MonoBehaviour
                 alphas[y, x] = 0f;
             }
         }
+    }
+
+    public void ApplyFilledTerrain(bool canyon, Vector3 worldPosition, Vector3 initialPosition, 
+                                   int terrainType, float xMin, float xMax, float yMin, float yMax, float radius, float erosionStrength)
+    {
+        if (worldPosition.x != initialPosition.x)
+        {
+            float start = Mathf.Min(worldPosition.x, initialPosition.x);
+            float end = Mathf.Max(worldPosition.x, initialPosition.x);
+
+            float y, z;
+
+            while (start < end)
+            {
+                y = initialPosition.y + (float)(start - initialPosition.x) / (float)(worldPosition.x - initialPosition.x) * (worldPosition.y - initialPosition.y);
+                z = initialPosition.z + (float)(start - initialPosition.x) / (float)(worldPosition.x - initialPosition.x) * (worldPosition.z - initialPosition.z);
+                if (canyon)
+                    LowerTerrain(new Vector3(start, _targetTerrain.transform.position.y, z),
+                                 (y - (_targetTerrain.transform.position.y + terrainOffset)) / 4f,
+                                 100, 100);
+                else
+                    RaiseTerrain(new Vector3(start, _targetTerrain.transform.position.y, z),
+                                 (y - (_targetTerrain.transform.position.y + terrainOffset)) / 4f,
+                                 100, 100);
+                start += 1f;
+            }
+        }
+        else
+        {
+            float start = Mathf.Min(worldPosition.z, initialPosition.z);
+            float end = Mathf.Max(worldPosition.z, initialPosition.z);
+
+            float x, y;
+
+            while (start < end)
+            {
+                x = initialPosition.x + (float)(start - initialPosition.z) / (float)(worldPosition.z - initialPosition.z) * (worldPosition.x - initialPosition.x);
+                y = initialPosition.y + (float)(start - initialPosition.z) / (float)(worldPosition.z - initialPosition.z) * (worldPosition.y - initialPosition.y);
+                if (canyon)
+                    LowerTerrain(new Vector3(x, _targetTerrain.transform.position.y, start),
+                                 (y - (_targetTerrain.transform.position.y + terrainOffset)) / 4f,
+                                 50, 50);
+                else
+                    RaiseTerrain(new Vector3(x, _targetTerrain.transform.position.y, start),
+                                 (y - (_targetTerrain.transform.position.y + terrainOffset)) / 4f,
+                                 50, 50);
+                start += 1f;
+            }
+        }
+
+        ApplyTerrain(true, terrainType, xMin, xMax, yMin, yMax, radius, erosionStrength);
     }
 
     public void ClearTerrain()

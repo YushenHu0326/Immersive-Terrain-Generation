@@ -18,6 +18,7 @@ public class TerrainModifier : MonoBehaviour
     public int xOffset, yOffset, range;
     public float terrainOffset = 50f;
     private float erosionStrength;
+    private int blurStrength;
 
     private Model model;
     public NNModel mountainModel;
@@ -106,9 +107,7 @@ public class TerrainModifier : MonoBehaviour
         tex.Apply();
 
         ParallelGaussianBlur blur = gameObject.AddComponent<ParallelGaussianBlur>();
-        if (terrainType == 0) blur.Radial = 15;
-        else if (terrainType == 1) blur.Radial = 12;
-        else if (terrainType == 2) blur.Radial = 15;
+        blur.Radial = blurStrength;
 
         blur.GaussianBlur(ref tex);
 
@@ -165,12 +164,14 @@ public class TerrainModifier : MonoBehaviour
 
     Texture2D RestoreHeightmap(Texture2D tex)
     {
+        /*
         ParallelGaussianBlur blur = gameObject.AddComponent<ParallelGaussianBlur>();
         blur.Radial = 1;
 
         blur.GaussianBlur(ref tex);
         blur.GaussianBlur(ref tex);
         DestroyImmediate(blur);
+        */
 
         tex.Apply();
         RenderTexture rt = RenderTexture.GetTemporary(range, range, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
@@ -191,6 +192,19 @@ public class TerrainModifier : MonoBehaviour
 
     void WriteTerrainData(Texture2D tex)
     {
+        Texture2D atex = new Texture2D(terrainData.heightmapResolution, terrainData.heightmapResolution, TextureFormat.ARGB32, false);
+        for (int y = 0; y < terrainData.heightmapResolution; y++)
+        {
+            for (int x = 0; x < terrainData.heightmapResolution; x++)
+            {
+                atex.SetPixel(x, y, new Color(alphas[y, x], alphas[y, x], alphas[y, x], 1f));
+            }
+        }
+
+        byte[] bytes = atex.EncodeToPNG();
+
+        System.IO.File.WriteAllBytes(Application.dataPath + "/a.png", bytes);
+
         float[,] originHeights = terrainData.GetHeights(0, 0, terrainData.heightmapResolution, terrainData.heightmapResolution);
         float[,] newHeights = new float[range, range];
 
@@ -230,26 +244,10 @@ public class TerrainModifier : MonoBehaviour
         terrainData.SetHeights(xOffset, yOffset, newHeights);
     }
 
-    public void Erosion()
-    {
-        GrabTerrainData();
-
-        float[,] originHeights = terrainData.GetHeights(0, 0, terrainData.heightmapResolution, terrainData.heightmapResolution);
-
-        for (int y = 0; y < terrainData.heightmapResolution; y++)
-        {
-            for (int x = 0; x < terrainData.heightmapResolution; x++)
-            {
-                originHeights[y, x] -= (1f - terrainData.GetInterpolatedNormal((float)y / terrainData.heightmapResolution, (float)x / terrainData.heightmapResolution).y) / terrainData.size.y;
-            }
-        }
-
-        terrainData.SetHeights(0, 0, originHeights);
-    }
-
-    public void ModifyTerrain(int i, float erosionStrength)
+    public void ModifyTerrain(int i, float erosionStrength, int blurStrength)
     {
         this.erosionStrength = erosionStrength;
+        this.blurStrength = blurStrength;
 
         LoadModel(i);
         GrabTerrainData();
@@ -285,17 +283,17 @@ public class TerrainModifier : MonoBehaviour
 
     public void ModifyMountain()
     {
-        ModifyTerrain(0, 100f);
+        ModifyTerrain(0, 100f, 15);
     }
 
     public void ModifyCanyon()
     {
-        ModifyTerrain(1, 100f);
+        ModifyTerrain(1, 100f, 15);
     }
 
     public void ModifyGlacier()
     {
-        ModifyTerrain(2, 100f);
+        ModifyTerrain(2, 100f, 15);
     }
 
     public void OnDestroy()

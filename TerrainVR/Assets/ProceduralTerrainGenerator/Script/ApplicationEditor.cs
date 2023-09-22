@@ -15,12 +15,7 @@ public class ApplicationEditor : EditorWindow
     {
         if (GUILayout.Button("Mountain"))
         {
-            //ModifyTerrain(0);
-            TerrainModifier[] terrains = FindObjectsOfType<TerrainModifier>();
-            if (terrains.Length > 0)
-            {
-                terrains[0].Erosion();
-            }
+            ModifyTerrain(0);
         }
 
         if (GUILayout.Button("Canyon"))
@@ -40,7 +35,7 @@ public class ApplicationEditor : EditorWindow
         if (terrains.Length > 0)
         {
             terrains[0].GetDefaultTerrain();
-            terrains[0].ModifyTerrain(i, 100f);
+            terrains[0].ModifyTerrain(i, 100f, 15);
         }
     }
 }

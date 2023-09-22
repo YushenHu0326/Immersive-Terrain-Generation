@@ -17,9 +17,11 @@ public class VRPlayer : MonoBehaviour
 
     private GameObject stroke;
     private int strokeIndex;
+    private Vector3 firstStrokePosition;
     private Vector3 lastStrokePosition;
+    private float initStrokeHeight;
     private bool strokeButtonPressed;
-
+    private bool filled;
     private float erosionStrength;
 
     private float xMin, xMax, yMin, yMax, radius;
@@ -86,6 +88,12 @@ public class VRPlayer : MonoBehaviour
         {
             if (!leftTriggerButtonPressed_f)
                 leftTriggerButtonPressed_f = true;
+
+            erosionStrength -= 1f;
+            if (erosionStrength < 0f) erosionStrength = 100f;
+            erosionStrength = Mathf.Clamp(erosionStrength, 0f, 100f);
+
+            Debug.Log(erosionStrength);
         }
         else
         {
@@ -101,26 +109,63 @@ public class VRPlayer : MonoBehaviour
             {
                 rightTriggerButtonPressed_f = true;
 
+                firstStrokePosition = rightController.transform.position;
+                initStrokeHeight = rightController.transform.position.y - (terrainTool._targetTerrain.transform.position.y + terrainTool.terrainOffset);
+
                 if (terrainType == TerrainType.Canyon)
                     terrainTool.OnCanyon();
             }
 
-            if (Physics.Raycast(new Vector3(rightController.transform.position.x, 500f, rightController.transform.position.z), Vector3.down, out var hit)
-                && (leftController != null && rightController != null))
+            float offset = rightController.transform.position.y - (terrainTool._targetTerrain.transform.position.y + terrainTool.terrainOffset);
+
+            if (Mathf.Abs(offset) * 2f > radius) radius = Mathf.Abs(offset) * 2f;
+
+            float brushSize = Mathf.Abs(offset) * 3f;
+
+            if (terrainType != TerrainType.Canyon)
             {
-                float offset = rightController.transform.position.y - (hit.transform.position.y + terrainTool.terrainOffset);
-
-                if (Mathf.Abs(offset) * 2f > radius) radius = Mathf.Abs(offset) * 2f;
-
-                float brushSize = Mathf.Abs(offset) * 3f;
-
-                if (terrainType != TerrainType.Canyon)
+                if (filled)
                 {
-                    terrainTool.RaiseTerrain(hit.point, Mathf.Abs(offset), (int)brushSize, (int)brushSize);
+                    terrainTool.RaiseTerrain(new Vector3(rightController.transform.position.x,
+                                                         terrainTool._targetTerrain.transform.position.y,
+                                                         rightController.transform.position.z),
+                                                         Mathf.Abs(offset) / 4f, (int)brushSize, (int)brushSize);
+
+                    terrainTool.RaiseTerrainFilled(new Vector3(rightController.transform.position.x, 
+                                                               terrainTool._targetTerrain.transform.position.y, 
+                                                               rightController.transform.position.z), 
+                                                               firstStrokePosition, Mathf.Abs(offset), 
+                                                               initStrokeHeight, (int)brushSize, (int)brushSize);
                 }
                 else
                 {
-                    terrainTool.LowerTerrain(hit.point, Mathf.Abs(offset), (int)brushSize, (int)brushSize);
+                    terrainTool.RaiseTerrain(new Vector3(rightController.transform.position.x,
+                                                               terrainTool._targetTerrain.transform.position.y,
+                                                               rightController.transform.position.z), 
+                                                               Mathf.Abs(offset), (int)brushSize, (int)brushSize);
+                }
+            }
+            else
+            {
+                if (filled)
+                {
+                    terrainTool.LowerTerrain(new Vector3(rightController.transform.position.x,
+                                                         terrainTool._targetTerrain.transform.position.y,
+                                                         rightController.transform.position.z),
+                                                         Mathf.Abs(offset) / 4f, (int)brushSize, (int)brushSize);
+
+                    terrainTool.LowerTerrainFilled(new Vector3(rightController.transform.position.x,
+                                                               terrainTool._targetTerrain.transform.position.y,
+                                                               rightController.transform.position.z),
+                                                               firstStrokePosition, Mathf.Abs(offset),
+                                                               initStrokeHeight, (int)brushSize, (int)brushSize);
+                }
+                else
+                {
+                    terrainTool.LowerTerrain(new Vector3(rightController.transform.position.x,
+                                                               terrainTool._targetTerrain.transform.position.y,
+                                                               rightController.transform.position.z),
+                                                               Mathf.Abs(offset), (int)brushSize, (int)brushSize);
                 }
             }
 
@@ -136,6 +181,10 @@ public class VRPlayer : MonoBehaviour
                 stroke = new GameObject("Stroke");
                 stroke.AddComponent<LineRenderer>();
                 stroke.GetComponent<LineRenderer>().material = new Material(Shader.Find("Sprites/Default"));
+                if (filled)
+                    stroke.GetComponent<LineRenderer>().loop = true;
+                else
+                    stroke.GetComponent<LineRenderer>().loop = false;
 
                 if (terrainType == TerrainType.Mountain)
                 {
@@ -153,18 +202,7 @@ public class VRPlayer : MonoBehaviour
                     stroke.GetComponent<LineRenderer>().endColor = Color.white;
                 }
             }
-            /*
-            if ((rightController.transform.position.x > -250f && rightController.transform.position.x < 250f) &&
-                (rightController.transform.position.z > -250f && rightController.transform.position.z < 250f))
-            {
-                if (redStroke)
-                    userInput.SetPixel((int)rightController.transform.position.x - 250, (int)rightController.transform.position.z - 250, 
-                        new Color(1f, 0f, 0f));
-                else
-                    userInput.SetPixel((int)rightController.transform.position.x - 250, (int)rightController.transform.position.z - 250,
-                        new Color(0f, 0f, 1f));
-            }
-            */
+
             if (Vector3.Distance(lastStrokePosition, rightController.transform.position) > 1f)
             {
                 stroke.GetComponent<LineRenderer>().positionCount = strokeIndex + 1;
@@ -183,7 +221,11 @@ public class VRPlayer : MonoBehaviour
                 if (terrainType == TerrainType.Canyon) terrainTypeNum = 1;
                 else if (terrainType == TerrainType.Glacier) terrainTypeNum = 2;
 
-                terrainTool.ApplyTerrain(terrainTypeNum, xMin, xMax, yMin, yMax, radius, erosionStrength);
+                if (filled)
+                    terrainTool.ApplyFilledTerrain(terrainType == TerrainType.Canyon ,rightController.transform.position, firstStrokePosition, 
+                                                   terrainTypeNum, xMin, xMax, yMin, yMax, radius, erosionStrength);
+                else
+                    terrainTool.ApplyTerrain(false, terrainTypeNum, xMin, xMax, yMin, yMax, radius, erosionStrength);
 
                 Destroy(stroke);
 
@@ -203,12 +245,11 @@ public class VRPlayer : MonoBehaviour
             if (!leftPrimaryButtonPressed_f)
             {
                 leftPrimaryButtonPressed_f = true;
+
+                if (terrainType == TerrainType.Mountain) terrainType = TerrainType.Canyon;
+                else if (terrainType == TerrainType.Canyon) terrainType = TerrainType.Glacier;
+                else terrainType = TerrainType.Mountain;
             }
-
-            if (erosionStrength < 100f) erosionStrength += 1f;
-            erosionStrength = Mathf.Clamp(erosionStrength, 0f, 100f);
-
-            Debug.Log(erosionStrength);
         }
         else
         {
@@ -222,11 +263,6 @@ public class VRPlayer : MonoBehaviour
             {
                 leftSecondaryButtonPressed_f = true;
             }
-
-            if (erosionStrength > 0f) erosionStrength -= 1f;
-            erosionStrength = Mathf.Clamp(erosionStrength, 0f, 100f);
-
-            Debug.Log(erosionStrength);
         }
         else
         {
@@ -253,9 +289,8 @@ public class VRPlayer : MonoBehaviour
             if (!rightSecondaryButtonPressed_f)
             {
                 rightSecondaryButtonPressed_f = true;
-                if (terrainType == TerrainType.Mountain) terrainType = TerrainType.Canyon;
-                else if (terrainType == TerrainType.Canyon) terrainType = TerrainType.Glacier;
-                else terrainType = TerrainType.Mountain;
+
+                filled = !filled;
             }
             /*
             byte[] bytes = userInput.EncodeToPNG();
