@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1292333221790347841}
   - component: {fileID: 8153814428779769728}
+  - component: {fileID: 904725421917684284}
   m_Layer: 0
   m_Name: TerrainModifier
   m_TagString: Untagged
@@ -43,6 +44,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 871bd138619286a4d926a52cb6848958, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mountainModel: {fileID: 5022602860645237092, guid: 45815fee239d61d40a68d156d8e46532, type: 3}
-  canyonModel: {fileID: 5022602860645237092, guid: 6a9dd68a0962c1c43882d030a5ab65fc, type: 3}
-  glacierModel: {fileID: 5022602860645237092, guid: 59495b39aa04db04e95582373b6e7b97, type: 3}
+  xOffset: 0
+  yOffset: 0
+  range: 0
+  terrainOffset: 50
+  mountainModel: {fileID: 5022602860645237092, guid: 45815fee239d61d40a68d156d8e46532,
+    type: 3}
+  canyonModel: {fileID: 5022602860645237092, guid: 6a9dd68a0962c1c43882d030a5ab65fc,
+    type: 3}
+  glacierModel: {fileID: 5022602860645237092, guid: 59495b39aa04db04e95582373b6e7b97,
+    type: 3}
+--- !u!114 &904725421917684284
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8150113172363373395}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31f6635f9419ada4e89dad9c9682283d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  grassLayer_1: {fileID: 8574412962073106934, guid: 130d104513b29bd44ae9c5b3915f4134,
+    type: 2}
+  grassLayer_2: {fileID: 8574412962073106934, guid: 62f82665abc6fbf4e8f7fa058cbd8d6c,
+    type: 2}
+  snowLayer: {fileID: 8574412962073106934, guid: 59b98ca43f27d8c4a89d4058d2a962e5,
+    type: 2}
+  cliffLayer_1: {fileID: 8574412962073106934, guid: a4f389caed25e6241b38ba88a286c911,
+    type: 2}
+  cliffLayer_2: {fileID: 8574412962073106934, guid: d1685375fd84e62439c572449faa4657,
+    type: 2}

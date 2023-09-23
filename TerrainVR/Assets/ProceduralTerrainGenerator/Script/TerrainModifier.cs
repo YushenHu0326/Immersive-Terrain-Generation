@@ -164,14 +164,12 @@ public class TerrainModifier : MonoBehaviour
 
     Texture2D RestoreHeightmap(Texture2D tex)
     {
-        /*
         ParallelGaussianBlur blur = gameObject.AddComponent<ParallelGaussianBlur>();
         blur.Radial = 1;
 
         blur.GaussianBlur(ref tex);
         blur.GaussianBlur(ref tex);
         DestroyImmediate(blur);
-        */
 
         tex.Apply();
         RenderTexture rt = RenderTexture.GetTemporary(range, range, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
@@ -276,6 +274,8 @@ public class TerrainModifier : MonoBehaviour
         Texture2D modifiedTex = RestoreHeightmap(newTex);
 
         WriteTerrainData(modifiedTex);
+
+        GetComponent<ProceduralTerrainPainter>().PaintTerrain();
     }
 
     public void ModifyMountain()
