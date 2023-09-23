@@ -20,6 +20,8 @@ public class TerrainModifier : MonoBehaviour
     private float erosionStrength;
     private int blurStrength;
 
+    public bool editorMode;
+
     private Model model;
     public NNModel mountainModel;
     public NNModel canyonModel;
@@ -168,7 +170,6 @@ public class TerrainModifier : MonoBehaviour
         blur.Radial = 1;
 
         blur.GaussianBlur(ref tex);
-        blur.GaussianBlur(ref tex);
         DestroyImmediate(blur);
 
         tex.Apply();
@@ -220,22 +221,31 @@ public class TerrainModifier : MonoBehaviour
         {
             for (int x = 0; x < range; x++)
             {
-                if (terrainType != 1)
-                    newHeights[y, x] = Mathf.Max(
-                                       originHeights[y + yOffset, x + xOffset],
-                                       Mathf.Lerp(tex.GetPixel(x, y).r / maxColor * (maxHeight - minHeight) + minHeight + terrainOffset / terrainData.size.y,
-                                                  originHeights[y + yOffset, x + xOffset],
-                                                  1f - alphas[y + yOffset, x + xOffset]
-                                       )
-                                       );
+                if (!editorMode)
+                {
+                    if (terrainType != 1)
+                        newHeights[y, x] = Mathf.Max(
+                                           originHeights[y + yOffset, x + xOffset],
+                                           Mathf.Lerp(tex.GetPixel(x, y).r / maxColor * (maxHeight - minHeight) + minHeight + terrainOffset / terrainData.size.y,
+                                                      originHeights[y + yOffset, x + xOffset],
+                                                      1f - alphas[y + yOffset, x + xOffset]
+                                           )
+                                           );
+                    else
+                        newHeights[y, x] = Mathf.Min(
+                                           originHeights[y + yOffset, x + xOffset],
+                                           Mathf.Lerp(tex.GetPixel(x, y).r / maxColor * terrainOffset / terrainData.size.y,
+                                                      originHeights[y + yOffset, x + xOffset],
+                                                      1f - alphas[y + yOffset, x + xOffset]
+                                           )
+                                           );
+
+                    newHeights[y, x] += Mathf.PerlinNoise((float)x / 5f, (float)y / 5f) / terrainData.size.y * alphas[y + yOffset, x + xOffset];
+                }
                 else
-                    newHeights[y, x] = Mathf.Min(
-                                       originHeights[y + yOffset, x + xOffset],
-                                       Mathf.Lerp(tex.GetPixel(x, y).r / maxColor *  terrainOffset / terrainData.size.y,
-                                                  originHeights[y + yOffset, x + xOffset],
-                                                  1f - alphas[y + yOffset, x + xOffset]
-                                       )
-                                       );
+                {
+                    newHeights[y, x] = tex.GetPixel(x, y).r / maxColor * (maxHeight - minHeight) + minHeight;
+                }
             }
         }
 

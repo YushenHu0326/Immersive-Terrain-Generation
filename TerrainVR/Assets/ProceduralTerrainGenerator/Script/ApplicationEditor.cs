@@ -34,6 +34,7 @@ public class ApplicationEditor : EditorWindow
         TerrainModifier[] terrains = FindObjectsOfType<TerrainModifier>();
         if (terrains.Length > 0)
         {
+            terrains[0].editorMode = true;
             terrains[0].GetDefaultTerrain();
             terrains[0].ModifyTerrain(i, 100f, 15);
         }

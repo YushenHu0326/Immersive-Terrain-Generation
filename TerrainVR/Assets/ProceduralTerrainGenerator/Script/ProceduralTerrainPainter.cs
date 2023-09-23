@@ -18,16 +18,7 @@ public class ProceduralTerrainPainter : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        terrain = Object.FindObjectOfType<Terrain>();
-        terrainData = terrain.terrainData;
-
-        terrainData.terrainLayers = new TerrainLayer[] { grassLayer_1, 
-                                                         grassLayer_2,
-                                                         snowLayer, 
-                                                         cliffLayer_1, 
-                                                         cliffLayer_2 };
-
-        alphas = terrainData.GetAlphamaps(0, 0, terrainData.alphamapWidth, terrainData.alphamapHeight);
+        InitializeTerrain();
 
         PaintTerrain();
     }
@@ -38,8 +29,24 @@ public class ProceduralTerrainPainter : MonoBehaviour
         
     }
 
+    public void InitializeTerrain()
+    {
+        terrain = Object.FindObjectOfType<Terrain>();
+        terrainData = terrain.terrainData;
+
+        terrainData.terrainLayers = new TerrainLayer[] { grassLayer_1,
+                                                         grassLayer_2,
+                                                         snowLayer,
+                                                         cliffLayer_1,
+                                                         cliffLayer_2 };
+
+        alphas = terrainData.GetAlphamaps(0, 0, terrainData.alphamapWidth, terrainData.alphamapHeight);
+    }
+
     public void PaintTerrain()
     {
+        InitializeTerrain();
+
         float[,] heights = terrainData.GetHeights(0, 0, terrainData.heightmapResolution, terrainData.heightmapResolution);
         float height = 0;
         float normal = 0f;
@@ -55,32 +62,35 @@ public class ProceduralTerrainPainter : MonoBehaviour
                 height = heights[(int)((float)y / (float)terrainData.alphamapHeight * (float)terrainData.heightmapResolution),
                                  (int)((float)x / (float)terrainData.alphamapWidth * (float)terrainData.heightmapResolution)] * terrainData.size.y;
                 normal = terrainData.GetInterpolatedNormal((float)(x) / (float)terrainData.alphamapWidth, (float)(y) / (float)terrainData.alphamapHeight).y;
-                noise = Mathf.PerlinNoise((float)x / 50f, (float)y / 50f);
+                noise = Mathf.PerlinNoise((float)x / 20f, (float)y / 20f);
                 layer = (int)(height / 10f);
 
-                tex.SetPixel(x, y, new Color(height / terrainData.size.y, 0f, 0f, 1f));
+                tex.SetPixel(x, y, new Color(normal, 0f, 0f, 1f));
 
-                if (normal > 0.75f)
+                if (normal > 0.8f)
                 {
-                    if (height < 90f)
+                    if (height > 60f)
                     {
-                        alphas[y, x, 0] = 0f;
-                        alphas[y, x, 1] = 0f;
-                        alphas[y, x, 2] = 1f;
-                    }
-                    else if (height < 100f)
-                    {
-                        alphas[y, x, 0] = 0f;
-                        alphas[y, x, 1] = 0f;
-                        alphas[y, x, 2] = 1f;
+                        if (noise > 0.3f)
+                        {
+                            alphas[y, x, 0] = 0f;
+                            alphas[y, x, 1] = 0f;
+                            alphas[y, x, 2] = 1f;
+                        }
+                        else
+                        {
+                            alphas[y, x, 0] = 1f;
+                            alphas[y, x, 1] = 0f;
+                            alphas[y, x, 2] = 0f;
+                        }
                     }
                     else
                     {
-                        alphas[y, x, 0] = 0f;
+                        alphas[y, x, 0] = 1f;
                         alphas[y, x, 1] = 0f;
-                        alphas[y, x, 2] = 1f;
+                        alphas[y, x, 2] = 0f;
                     }
-                    
+
                     alphas[y, x, 3] = 0f;
                     alphas[y, x, 4] = 0f;
 

@@ -156,7 +156,7 @@ public class VRPlayer : MonoBehaviour
 
             if (Mathf.Abs(offset) * 2f > radius) radius = Mathf.Abs(offset) * 2f;
 
-            float brushSize = Mathf.Abs(offset) * 3f;
+            float brushSize = Mathf.Abs(offset) * 4f;
 
             if (terrainType != TerrainType.Canyon)
             {
@@ -165,7 +165,7 @@ public class VRPlayer : MonoBehaviour
                     terrainTool.RaiseTerrain(new Vector3(rightController.transform.position.x,
                                                          terrainTool._targetTerrain.transform.position.y,
                                                          rightController.transform.position.z),
-                                                         Mathf.Abs(offset) / 4f, 100, 100);
+                                                         Mathf.Abs(offset) / 4f, 200, 200);
 
                     terrainTool.RaiseTerrainFilled(new Vector3(rightController.transform.position.x, 
                                                                terrainTool._targetTerrain.transform.position.y, 
@@ -190,7 +190,7 @@ public class VRPlayer : MonoBehaviour
                     terrainTool.LowerTerrain(new Vector3(rightController.transform.position.x,
                                                          terrainTool._targetTerrain.transform.position.y,
                                                          rightController.transform.position.z),
-                                                         Mathf.Abs(offset) / 4f, 100, 100);
+                                                         Mathf.Abs(offset) / 4f, 200, 200);
 
                     terrainTool.LowerTerrainFilled(new Vector3(rightController.transform.position.x,
                                                                terrainTool._targetTerrain.transform.position.y,

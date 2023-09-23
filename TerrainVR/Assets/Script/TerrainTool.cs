@@ -289,6 +289,7 @@ public sealed class TerrainTool : MonoBehaviour
         float range = Mathf.Max(max.x - min.x, max.z - min.z) + 2f * radius;
 
         TerrainModifier modifier = Object.FindObjectOfType<TerrainModifier>();
+        modifier.editorMode = false;
         modifier.heights = virtualHeights;
         modifier.alphas = alphas;
         modifier.xOffset = (int)(min.x - radius);
