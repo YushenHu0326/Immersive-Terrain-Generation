@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,11 +17,11 @@ public class VRPlayer : MonoBehaviour
     public GameObject rightController;
 
     private GameObject stroke;
+    private GameObject surface;
     private int strokeIndex;
     private Vector3 firstStrokePosition;
     private Vector3 lastStrokePosition;
     private float initStrokeHeight;
-    private bool strokeButtonPressed;
     private bool filled;
     private float erosionStrength;
 
@@ -114,69 +115,8 @@ public class VRPlayer : MonoBehaviour
 
                 if (terrainType == TerrainType.Canyon)
                     terrainTool.OnCanyon();
-            }
 
-            float offset = rightController.transform.position.y - (terrainTool._targetTerrain.transform.position.y + terrainTool.terrainOffset);
 
-            if (Mathf.Abs(offset) * 2f > radius) radius = Mathf.Abs(offset) * 2f;
-
-            float brushSize = Mathf.Abs(offset) * 3f;
-
-            if (terrainType != TerrainType.Canyon)
-            {
-                if (filled)
-                {
-                    terrainTool.RaiseTerrain(new Vector3(rightController.transform.position.x,
-                                                         terrainTool._targetTerrain.transform.position.y,
-                                                         rightController.transform.position.z),
-                                                         Mathf.Abs(offset) / 4f, (int)brushSize, (int)brushSize);
-
-                    terrainTool.RaiseTerrainFilled(new Vector3(rightController.transform.position.x, 
-                                                               terrainTool._targetTerrain.transform.position.y, 
-                                                               rightController.transform.position.z), 
-                                                               firstStrokePosition, Mathf.Abs(offset), 
-                                                               initStrokeHeight, (int)brushSize, (int)brushSize);
-                }
-                else
-                {
-                    terrainTool.RaiseTerrain(new Vector3(rightController.transform.position.x,
-                                                               terrainTool._targetTerrain.transform.position.y,
-                                                               rightController.transform.position.z), 
-                                                               Mathf.Abs(offset), (int)brushSize, (int)brushSize);
-                }
-            }
-            else
-            {
-                if (filled)
-                {
-                    terrainTool.LowerTerrain(new Vector3(rightController.transform.position.x,
-                                                         terrainTool._targetTerrain.transform.position.y,
-                                                         rightController.transform.position.z),
-                                                         Mathf.Abs(offset) / 4f, (int)brushSize, (int)brushSize);
-
-                    terrainTool.LowerTerrainFilled(new Vector3(rightController.transform.position.x,
-                                                               terrainTool._targetTerrain.transform.position.y,
-                                                               rightController.transform.position.z),
-                                                               firstStrokePosition, Mathf.Abs(offset),
-                                                               initStrokeHeight, (int)brushSize, (int)brushSize);
-                }
-                else
-                {
-                    terrainTool.LowerTerrain(new Vector3(rightController.transform.position.x,
-                                                               terrainTool._targetTerrain.transform.position.y,
-                                                               rightController.transform.position.z),
-                                                               Mathf.Abs(offset), (int)brushSize, (int)brushSize);
-                }
-            }
-
-            if (rightController.transform.position.x < xMin) xMin = rightController.transform.position.x;
-            if (rightController.transform.position.x > xMax) xMax = rightController.transform.position.x;
-            if (rightController.transform.position.z < yMin) yMin = rightController.transform.position.z;
-            if (rightController.transform.position.z > yMax) yMax = rightController.transform.position.z;
-
-            if (!strokeButtonPressed)
-            {
-                strokeButtonPressed = true;
                 lastStrokePosition = rightController.transform.position;
                 stroke = new GameObject("Stroke");
                 stroke.AddComponent<LineRenderer>();
@@ -201,13 +141,104 @@ public class VRPlayer : MonoBehaviour
                     stroke.GetComponent<LineRenderer>().startColor = Color.white;
                     stroke.GetComponent<LineRenderer>().endColor = Color.white;
                 }
+
+                if (filled)
+                {
+                    surface = new GameObject("Surface");
+                    surface.AddComponent<MeshFilter>();
+                    surface.AddComponent<MeshRenderer>();
+                    surface.GetComponent<MeshFilter>().mesh = new Mesh();
+                    surface.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Sprites/Default"));
+                }
             }
+
+            float offset = rightController.transform.position.y - (terrainTool._targetTerrain.transform.position.y + terrainTool.terrainOffset);
+
+            if (Mathf.Abs(offset) * 2f > radius) radius = Mathf.Abs(offset) * 2f;
+
+            float brushSize = Mathf.Abs(offset) * 3f;
+
+            if (terrainType != TerrainType.Canyon)
+            {
+                if (filled)
+                {
+                    terrainTool.RaiseTerrain(new Vector3(rightController.transform.position.x,
+                                                         terrainTool._targetTerrain.transform.position.y,
+                                                         rightController.transform.position.z),
+                                                         Mathf.Abs(offset) / 4f, 100, 100);
+
+                    terrainTool.RaiseTerrainFilled(new Vector3(rightController.transform.position.x, 
+                                                               terrainTool._targetTerrain.transform.position.y, 
+                                                               rightController.transform.position.z), 
+                                                               firstStrokePosition, Mathf.Abs(offset), 
+                                                               initStrokeHeight, 
+                                                               (int)(Vector3.Distance(rightController.transform.position, lastStrokePosition)) * 2,
+                                                               (int)(Vector3.Distance(rightController.transform.position, lastStrokePosition)) * 2);
+                }
+                else
+                {
+                    terrainTool.RaiseTerrain(new Vector3(rightController.transform.position.x,
+                                                               terrainTool._targetTerrain.transform.position.y,
+                                                               rightController.transform.position.z), 
+                                                               Mathf.Abs(offset), (int)brushSize, (int)brushSize);
+                }
+            }
+            else
+            {
+                if (filled)
+                {
+                    terrainTool.LowerTerrain(new Vector3(rightController.transform.position.x,
+                                                         terrainTool._targetTerrain.transform.position.y,
+                                                         rightController.transform.position.z),
+                                                         Mathf.Abs(offset) / 4f, 100, 100);
+
+                    terrainTool.LowerTerrainFilled(new Vector3(rightController.transform.position.x,
+                                                               terrainTool._targetTerrain.transform.position.y,
+                                                               rightController.transform.position.z),
+                                                               firstStrokePosition, Mathf.Abs(offset),
+                                                               initStrokeHeight,
+                                                               (int)(Vector3.Distance(rightController.transform.position, lastStrokePosition)) * 2,
+                                                               (int)(Vector3.Distance(rightController.transform.position, lastStrokePosition)) * 2);
+                }
+                else
+                {
+                    terrainTool.LowerTerrain(new Vector3(rightController.transform.position.x,
+                                                               terrainTool._targetTerrain.transform.position.y,
+                                                               rightController.transform.position.z),
+                                                               Mathf.Abs(offset), (int)brushSize, (int)brushSize);
+                }
+            }
+
+            if (rightController.transform.position.x < xMin) xMin = rightController.transform.position.x;
+            if (rightController.transform.position.x > xMax) xMax = rightController.transform.position.x;
+            if (rightController.transform.position.z < yMin) yMin = rightController.transform.position.z;
+            if (rightController.transform.position.z > yMax) yMax = rightController.transform.position.z;
 
             if (Vector3.Distance(lastStrokePosition, rightController.transform.position) > 1f)
             {
                 stroke.GetComponent<LineRenderer>().positionCount = strokeIndex + 1;
                 stroke.GetComponent<LineRenderer>().SetPosition(strokeIndex, rightController.transform.position);
                 strokeIndex++;
+
+                if (surface != null)
+                {
+                    Vector3[] vertices = new Vector3[surface.GetComponent<MeshFilter>().mesh.vertices.Length + 3];
+                    int[] triangles = new int[surface.GetComponent<MeshFilter>().mesh.triangles.Length + 3];
+
+                    Array.Copy(surface.GetComponent<MeshFilter>().mesh.vertices, vertices, surface.GetComponent<MeshFilter>().mesh.vertices.Length);
+                    Array.Copy(surface.GetComponent<MeshFilter>().mesh.triangles, triangles, surface.GetComponent<MeshFilter>().mesh.triangles.Length);
+
+                    vertices[surface.GetComponent<MeshFilter>().mesh.vertices.Length] = firstStrokePosition;
+                    vertices[surface.GetComponent<MeshFilter>().mesh.vertices.Length + 1] = lastStrokePosition;
+                    vertices[surface.GetComponent<MeshFilter>().mesh.vertices.Length + 2] = rightController.transform.position;
+                    surface.GetComponent<MeshFilter>().mesh.vertices = vertices;
+
+                    triangles[surface.GetComponent<MeshFilter>().mesh.triangles.Length] = surface.GetComponent<MeshFilter>().mesh.triangles.Length;
+                    triangles[surface.GetComponent<MeshFilter>().mesh.triangles.Length + 1] = surface.GetComponent<MeshFilter>().mesh.triangles.Length + 1;
+                    triangles[surface.GetComponent<MeshFilter>().mesh.triangles.Length + 2] = surface.GetComponent<MeshFilter>().mesh.triangles.Length + 2;
+                    surface.GetComponent<MeshFilter>().mesh.triangles = triangles;
+                }
+
                 lastStrokePosition = rightController.transform.position;
             }
         }
@@ -229,6 +260,8 @@ public class VRPlayer : MonoBehaviour
 
                 Destroy(stroke);
 
+                if (surface != null) Destroy(surface);
+
                 xMin = 10000f;
                 xMax = -10000f;
                 yMin = 10000f;
@@ -236,7 +269,7 @@ public class VRPlayer : MonoBehaviour
                 radius = 0f;
             }
 
-            strokeButtonPressed = false;
+
             strokeIndex = 0;
         }
 
