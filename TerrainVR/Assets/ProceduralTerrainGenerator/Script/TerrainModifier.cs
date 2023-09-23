@@ -276,9 +276,6 @@ public class TerrainModifier : MonoBehaviour
         Texture2D modifiedTex = RestoreHeightmap(newTex);
 
         WriteTerrainData(modifiedTex);
-
-        eTerrain eTerrain = terrain.gameObject.GetComponent<eTerrain>();
-        if (eTerrain != null) eTerrain.Splat();
     }
 
     public void ModifyMountain()

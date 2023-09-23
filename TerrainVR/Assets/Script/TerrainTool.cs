@@ -378,9 +378,6 @@ public sealed class TerrainTool : MonoBehaviour
         }
 
         terrainData.SetHeights(0, 0, heights);
-
-        eTerrain eTerrain = _targetTerrain.gameObject.GetComponent<eTerrain>();
-        if (eTerrain != null) eTerrain.Splat();
     }
 
     public void FlattenTerrain(Vector3 worldPosition, float height, int brushWidth, int brushHeight)

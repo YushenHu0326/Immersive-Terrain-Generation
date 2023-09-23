@@ -1168,7 +1168,6 @@ GameObject:
   - component: {fileID: 2029451157}
   - component: {fileID: 2029451159}
   - component: {fileID: 2029451158}
-  - component: {fileID: 2029451160}
   m_Layer: 0
   m_Name: Terrain_0_0_a8867e3f-adeb-4718-bc64-c9bd4a30fe83
   m_TagString: Untagged
@@ -1234,30 +1233,3 @@ Terrain:
   m_GroupingID: 0
   m_RenderingLayerMask: 1
   m_AllowAutoConnect: 1
---- !u!114 &2029451160
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2029451156}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5e27719eb892dcf44bdcd2d83849d960, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  smoothingIterations: 1
-  flatGroundTexNo: 0
-  belowBaselevelTexNo: 1
-  highSteepTexNo: 2
-  lowSteepTexNo: 3
-  baselevelHeight: 0.5
-  steepnessFactor: 0.5
-  ApplyNoise: 00000000
-  tex0ReLevel: 0
-  tex1ReLevel: 0
-  tex2ReLevel: 0
-  tex3ReLevel: 0
-  stitchWithThisTerrain: {fileID: 0}
-  stitchSmoothingDistance: 0
-  iterations: 1
